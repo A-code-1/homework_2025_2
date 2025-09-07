@@ -44,4 +44,47 @@ QUnit.module("Тестируем функцию fetchAndMerge", function() {
         assert.deepEqual(result, {}, "Должно возвращать пустой объект при ошибке fetch");
     });
 });
+QUnit.module("Дополнительные тесты fetchAndMerge", function() {
+    QUnit.test("Объединяет объекты с одинаковыми значениями", async function(assert) {
+        const urls = [
+            'https://example.com/1',
+            'https://example.com/2',
+        ];
+        
+        window.fetch = (url) => {
+            const data = {
+                'https://example.com/1': { x: 1, y: 2 },
+                'https://example.com/2': { x: 1, z: 3 },
+            };
+            return Promise.resolve({ ok: true, json: () => Promise.resolve(data[url]) });
+        };
 
+        const expected = { 
+            x: [1], // массив
+            y: [2],
+            z: [3]
+        };
+
+        const result = await fetchAndMergeData(urls);
+        assert.deepEqual(result, expected, "Все значения — массивы, одинаковые значения не дублируются");
+    });
+
+    QUnit.test("Объединяет объекты с разными значениями одного ключа", async function(assert) {
+        const urls = [
+            'https://example.com/a',
+            'https://example.com/b',
+        ];
+
+        window.fetch = (url) => {
+            const data = {
+                'https://example.com/a': { key: 'val1' },
+                'https://example.com/b': { key: 'val2' },
+            };
+            return Promise.resolve({ ok: true, json: () => Promise.resolve(data[url]) });
+        };
+
+        const expected = { key: ['val1', 'val2'] };
+        const result = await fetchAndMergeData(urls);
+        assert.deepEqual(result, expected, "Собираются разные значения в массив");
+    });
+});

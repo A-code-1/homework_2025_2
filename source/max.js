@@ -10,4 +10,4 @@
  * 
  * @returns {Number}
  */
-const max = numbers => Math.max(...numbers);
+ const max = numbers => Math.max(...numbers);
