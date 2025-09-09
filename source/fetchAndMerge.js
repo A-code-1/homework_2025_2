@@ -9,7 +9,6 @@
  * @returns {Promise<Object>} - промис, который резолвится в объединенный объект
  */
 const fetchAndMergeData = async (urls) => {
-    
     if (!Array.isArray(urls)) {
         throw new TypeError("Аргумент urls должен быть массивом");
     }
@@ -29,7 +28,9 @@ const fetchAndMergeData = async (urls) => {
         //тут собираем все объекты
         const merged = results.reduce((acc, obj) => {
             Object.entries(obj).forEach(([key, value]) => {
-                if (!acc[key]) acc[key] = new Set();
+                if (!acc[key]) {
+                    acc[key] = new Set();
+                }
                 acc[key].add(value);
             });
             return acc;
@@ -37,7 +38,7 @@ const fetchAndMergeData = async (urls) => {
     
         // преобразуем Set обратно в массивы
         const array = Object.fromEntries(
-        Object.entries(merged).map(([key, valueSet]) => [key, [...valueSet]])
+            Object.entries(merged).map(([key, valueSet]) => [key, [...valueSet]])
         );
     
         return array;
