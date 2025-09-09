@@ -1,6 +1,5 @@
 'use strict';
 
-
 /**
  * загружает JSON с нескольких URL и объединяет их в один объект.
  * если ключ встречается в нескольких объектах, значения собираются в массив уникальных значений.
@@ -9,7 +8,16 @@
  * @param {Array<string>} urls - массив URL-адресов 
  * @returns {Promise<Object>} - промис, который резолвится в объединенный объект
  */
-async function fetchAndMergeData(urls) {
+const fetchAndMergeData = async (urls) => {
+    
+    if (!Array.isArray(urls)) {
+        throw new TypeError("Аргумент urls должен быть массивом");
+    }
+
+    if (!urls.every(url => typeof url === "string")) {
+        throw new TypeError("Каждый элемент массива urls должен быть строкой");
+    }
+
     // загружаем URL-адреса параллельно
         const results = await Promise.all(
             urls.map(url =>
@@ -19,21 +27,18 @@ async function fetchAndMergeData(urls) {
             )
         );
         //тут собираем все объекты
-        const merged = {};
-
-        for (const obj of results) {
-            for (const [key, value] of Object.entries(obj)) {
-                if (!merged[key]) {
-                    merged[key] = new Set(); // для уникальных значений
-                }
-                merged[key].add(value);
-            }
-        }
+        const merged = results.reduce((acc, obj) => {
+            Object.entries(obj).forEach(([key, value]) => {
+                if (!acc[key]) acc[key] = new Set();
+                acc[key].add(value);
+            });
+            return acc;
+        }, {});
     
         // преобразуем Set обратно в массивы
-        for (const key in merged) {
-            merged[key] = [...merged[key]]; //сохраняется порядок добавления
-        }
+        const array = Object.fromEntries(
+        Object.entries(merged).map(([key, valueSet]) => [key, [...valueSet]])
+        );
     
-        return merged;
+        return array;
 }

@@ -44,6 +44,7 @@ QUnit.module("Тестируем функцию fetchAndMerge", function() {
         assert.deepEqual(result, {}, "Должно возвращать пустой объект при ошибке fetch");
     });
 });
+
 QUnit.module("Дополнительные тесты fetchAndMerge", function() {
     QUnit.test("Объединяет объекты с одинаковыми значениями", async function(assert) {
         const urls = [
@@ -86,5 +87,27 @@ QUnit.module("Дополнительные тесты fetchAndMerge", function()
         const expected = { key: ['val1', 'val2'] };
         const result = await fetchAndMergeData(urls);
         assert.deepEqual(result, expected, "Собираются разные значения в массив");
+    });
+});
+
+QUnit.module("Тесты на неправильные данные", function() {
+    QUnit.test("Ошибка, если аргумент не массив", async function(assert) {
+        try {
+            await fetchAndMergeData("не массив");
+            assert.ok(false, "Должна была быть ошибка");
+        } catch (e) {
+            assert.ok(e instanceof TypeError, "Ошибка типа TypeError");
+            assert.equal(e.message, "Аргумент urls должен быть массивом");
+        }
+    });
+    
+    QUnit.test("Ошибка, если элементы массива не строки", async function(assert) {
+        try {
+            await fetchAndMergeData([123, true]);
+            assert.ok(false, "Должна была быть ошибка");
+        } catch (e) {
+            assert.ok(e instanceof TypeError, "Ошибка типа TypeError");
+            assert.equal(e.message, "Каждый элемент массива urls должен быть строкой");
+        }
     });
 });
