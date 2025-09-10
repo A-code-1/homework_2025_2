@@ -13,10 +13,11 @@ const fetchAndMergeData = async (urls) => {
         throw new TypeError("Аргумент urls должен быть массивом");
     }
 
-    if (!urls.every(url => typeof url === "string")) {
+    if (!urls.every(url => typeof url === "string" || url instanceof String)) {
         throw new TypeError("Каждый элемент массива urls должен быть строкой");
     }
-
+    urls = urls.map(url => url.toString());
+    
     // загружаем URL-адреса параллельно
         const results = await Promise.all(
             urls.map(url =>
